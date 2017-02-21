@@ -33,14 +33,14 @@ public class ClientActivity extends Activity {
     private TextView mTextViewResult;
     private Button mButtonSend;
     private Handler mHandler;
-    private ICalculatorService mService;
-    private ICalculatorCallback mCallback = new ICalculatorCallback.Stub() { // Serviceではサービスの実体をStubの継承で作成したが、Activityではコールバックの実体を、コールバックのStubを継承して実装
+    private ICalculateService mService;
+    private ICalculateCallback mCallback = new ICalculateCallback.Stub() { // Serviceではサービスの実体をStubの継承で作成したが、Activityではコールバックの実体を、コールバックのStubを継承して実装
         @Override
         public void resultSum(final int value) throws RemoteException {
             Log.d(TAG, "resultSum:" + value);
             mHandler.post(new Runnable() {
                 public void run() {
-                    mTextViewResult.setText("Result:" + value);
+                    mTextViewResult.setText("" + value);
                 }
             });
         }
@@ -54,7 +54,7 @@ public class ClientActivity extends Activity {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) { // この中で*のように自動生成されたStubクラスの静的メソッドでサービスを取得
-            mService = ICalculatorService.Stub.asInterface(service); // *
+            mService = ICalculateService.Stub.asInterface(service); // *
             try {
                 mService.registerCallback(mCallback);
             } catch (RemoteException e) {
@@ -67,7 +67,7 @@ public class ClientActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        setContentView(R.layout.activity_main);
 
         mEditTextLhs = (EditText) findViewById(R.id.editTextLhs);
         mEditTextRhs = (EditText) findViewById(R.id.editTextRhs);
@@ -102,14 +102,21 @@ public class ClientActivity extends Activity {
             }
         });
         mHandler = new Handler();
-        bindService(new Intent(ICalculatorService.class.getName()), mServiceConnection, BIND_AUTO_CREATE); //ServiceConnectionでサービスに接続するには、bindService(...)にインスタンスを渡す。ここで指定するアクションはサービスごとに決められたものである必要あり
+
+        // bindService(new Intent(ICalculateService.class.getName()), mServiceConnection, BIND_AUTO_CREATE);
+        // ServiceConnectionでサービスに接続するには、bindService(...)にインスタンスを渡す。指定するアクションはサービスごとに決められたもの
+
+        // Android5.0以降は以下の方法でバインドしないとService Intent must be explicitで動かない
+        Intent intent = new Intent(ICalculateService.class.getName());
+        intent.setPackage("com.example.fujinolabpc_2016_02.serviceapp");
+        this.bindService(intent, mServiceConnection, BIND_AUTO_CREATE); // bindService()はクライアントの指示を明確に受け取る場合に有効、startService()でもサービスに接続できるが各々特徴あり
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         if (mService != null) {
-            unbindService(mServiceConnection); // サービスとの切断を行うには、unbindService(...)にServiceConnectionのインスタンスを渡す
+            unbindService(mServiceConnection); // サービスとの切断を行うには、unbindService(...)にServiceConnectionのインスタンスを渡す,サービス側ではonUnbind()が呼び出される
         }
     }
 
@@ -125,12 +132,12 @@ public class ClientActivity extends Activity {
         } else if (op.equals("-") || op.equals("*") || op.equals("/")) {
             lhs = new StringTokenizer(lhs, " ").nextToken();
             rhs = new StringTokenizer(rhs, " ").nextToken();
-            CalculatorExpression exp = new CalculatorExpression();
-            exp.mOp = new CalculatorElement();
-            exp.mLhs = new CalculatorElement();
-            exp.mRhs = new CalculatorElement();
+            CalculateExpression exp = new CalculateExpression();
+            exp.mOp = new CalculateElement();
+            exp.mLhs = new CalculateElement();
+            exp.mRhs = new CalculateElement();
 
-            exp.mOp.mKind = CalculatorElement.OPERATOR;
+            exp.mOp.mKind = CalculateElement.OPERATOR;
             exp.mOp.mValue = op.charAt(0);
             exp.mLhs.mValue = Integer.valueOf(lhs);
             exp.mRhs.mValue = Integer.valueOf(rhs);
@@ -143,7 +150,7 @@ public class ClientActivity extends Activity {
             }
             if (op.equals("sum")) {
                 mService.sum(list);
-                return; // does not need setText of result
+                return;
             } else {
                 int[] values = new int[list.size()];
                 for (int i = 0; i < values.length; i++) {

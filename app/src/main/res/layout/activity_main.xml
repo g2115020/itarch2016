@@ -10,8 +10,64 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.fujinolabpc_2016_02.serviceapp.ClientActivity">
 
-    <TextView
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/linearLayout2">
+
+        <EditText
+            android:id="@+id/editTextLhs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="4"
+            android:text="12 34 56 78" >
+
+            <requestFocus />
+        </EditText>
+
+        <Spinner
+            android:id="@+id/spinnerOp"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="7.09" />
+
+        <EditText
+            android:id="@+id/editTextRhs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="4"
+            android:inputType="numberSigned"
+            android:text="1" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/buttonSend"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!" />
+        android:onClick="onClick"
+        android:text="Send"
+        android:layout_below="@+id/linearLayout2"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="69dp" />
+
+    <TextView
+        android:id="@+id/textViewResult"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:textColor="@color/colorAccent"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:text="RESULT"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:id="@+id/textView"
+        android:textColor="@color/colorAccent"
+        android:textSize="18sp"
+        android:layout_above="@+id/textViewResult"
+        android:layout_centerHorizontal="true" />
+
 </RelativeLayout>

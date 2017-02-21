@@ -10,32 +10,32 @@ import android.util.Log;
 
 import java.util.List;
 
-public class CalculatorService extends Service {
-    private static final String TAG = "CalculatorService";
-    private ICalculatorService.Stub mStub = new ICalculatorService.Stub() { //Stubを匿名で実装
-        private RemoteCallbackList<ICalculatorCallback> mCallbacks = new RemoteCallbackList<ICalculatorCallback>();
+public class CalculateService extends Service {
+    private static final String TAG = "CalculateService";
+    private ICalculateService.Stub mStub = new ICalculateService.Stub() { //Stubを実装
+        private RemoteCallbackList<ICalculateCallback> mCallbacks = new RemoteCallbackList<ICalculateCallback>();
 
         @Override
-        public void registerCallback(ICalculatorCallback callback) throws RemoteException {
+        public void registerCallback(ICalculateCallback callback) throws RemoteException {
             Log.d(TAG, "registerCallback");
             mCallbacks.register(callback);
         }
 
         @Override
-        public void unregisterCallback(ICalculatorCallback callback) throws RemoteException {
+        public void unregisterCallback(ICalculateCallback callback) throws RemoteException {
             Log.d(TAG, "unregisterCallback");
             mCallbacks.unregister(callback);
         }
 
+        // AIDLファイルで定義した各処理を実装
         @Override
-        public int add(int lhs, int rhs) throws RemoteException { // AIDLファイルで定義したインターフェイスを実装
+        public int add(int lhs, int rhs) throws RemoteException {
             Log.d(TAG, "add (" + lhs + " + " + rhs + " = " + (lhs + rhs) + ")");
             return lhs + rhs;
         }
 
         @Override
         public void sum(@SuppressWarnings("rawtypes") List values) throws RemoteException {
-            // 上の SuppressWarnings は、AIDL には generics は使用できないため
             Log.d(TAG, "sum");
             int total = 0;
             for (Object obj : values) {
@@ -74,7 +74,7 @@ public class CalculatorService extends Service {
         }
 
         @Override
-        public int eval(CalculatorExpression exp) throws RemoteException {
+        public int eval(CalculateExpression exp) throws RemoteException {
             Log.d(TAG, "eval:" + (char) exp.mOp.mValue);
             int result;
             switch (exp.mOp.mValue) {
@@ -105,7 +105,7 @@ public class CalculatorService extends Service {
     }
 
     @Override
-    public boolean onUnbind(Intent intent) {
+    public boolean onUnbind(Intent intent) { // サービスから切断するとき呼び出す
         boolean result = super.onUnbind(intent);
         Log.d(TAG, "onUnbind:" + result);
         return result;
@@ -121,4 +121,3 @@ public class CalculatorService extends Service {
         Log.d(TAG, "onDestroy");
     }
 }
-
